@@ -31,7 +31,7 @@ export class PacketReceiver {
 
     this.handlers = new Map();
 
-    this.transporter.on('data', (buffer) => {
+    this.transporter.on('data', (buffer, sender) => {
       if (typeof (this.cryptography) != 'undefined') {
         buffer = this.cryptography.decrypt(buffer);
       }
@@ -40,7 +40,7 @@ export class PacketReceiver {
       const handler = this.handlers.get(packet.type);
 
       if (typeof (handler) != 'undefined') {
-        handler(packet);
+        handler(packet, sender);
       }
     });
   }

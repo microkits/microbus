@@ -1,5 +1,5 @@
 import {Packet} from './Packet';
 
 export interface PacketHandler {
-  (packet: Packet): void
+  (packet: Packet, sender: string): void
 }
