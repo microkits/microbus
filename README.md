@@ -139,7 +139,7 @@ export class MqttTransporter extends Transporter {
 
 ## Serializer
 Serializers allow packets to be converted to buffers and from buffers back to packets. 
-It is required to extends the `Serializer` class, implementing the following methods: 
+It is required to implements the `Serializer` interface, with the following methods: 
 
 ```typescript
 serialize(packet: Packet): Buffer
