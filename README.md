@@ -13,7 +13,7 @@ const microbus = new Microbus({
 });
 
 // If receiver parameter is not passed, the packet is broadcasted.
-microbus.sendPacket(new MessagePacket("Hi, I'm traveling around the world in a microbus!"));
+microbus.sendPacket(new MessagePacket("Hi, I'm traveling around the world in a microbus! 🌎🚐"));
 ```
 
 ## Receiving a packet 
