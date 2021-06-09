@@ -58,7 +58,7 @@ export class Microbus {
    * @param {string} type - The type of packet to handle
    * @param {PacketHandler} handler - The handler that will handle the packet
    */
-  addHandler(type: string, handler: PacketHandler) {
+  addHandler(type: string | Symbol, handler: PacketHandler) {
     this.receiver.addHandler(type, handler);
   }
 

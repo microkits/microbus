@@ -14,10 +14,12 @@ interface Options {
  * the buffers received by the transporter
  */
 export class PacketReceiver {
-  private readonly handlers: Map<string, PacketHandler[]>;
+  private readonly handlers: Map<string | Symbol, PacketHandler[]>;
   private readonly transporter: Transporter;
   private readonly serializer: Serializer;
   private readonly cryptography: CryptographyStrategy;
+
+  static readonly ALL = Symbol("*");
 
   /**
    * Creates an instance of PacketReceiver.
@@ -37,12 +39,13 @@ export class PacketReceiver {
       }
 
       const packet = this.serializer.deserialize(buffer);
-      const handlers = this.handlers.get(packet.type);
+      const handlers = [
+        ...this.handlers.get(packet.type) ?? [],
+        ...this.handlers.get(PacketReceiver.ALL) ?? []
+      ];
 
-      if (typeof (handlers) != 'undefined') {
-        for (const handler of handlers) {
-          handler(packet, sender);
-        }
+      for (const handler of handlers) {
+        handler(packet, sender);
       }
     });
   }
@@ -53,7 +56,7 @@ export class PacketReceiver {
    * @param {string} type - The type of packet to handle
    * @param {PacketHandler} handler - The handler that will handle the packet
    */
-  addHandler(type: string, handler: PacketHandler) {
+  addHandler(type: string | Symbol, handler: PacketHandler) {
     const handlers = this.handlers.get(type) ?? [];
 
     handlers.push(handler);
