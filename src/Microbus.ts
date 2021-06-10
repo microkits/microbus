@@ -1,9 +1,8 @@
 
 import {CryptographyStrategy} from './cryptography/CryptographyStrategy';
+import {Handler} from './packets/Handler';
 import {Packet} from './packets/Packet';
 import {PacketHandler} from './packets/PacketHandler';
-import {PacketReceiver} from './packets/PacketReceiver';
-import {PacketSender} from './packets/PacketSender';
 import {Serializer} from './serializer/Serializer';
 import {Transporter} from './transporter/Transporter';
 
@@ -17,8 +16,7 @@ interface Options {
  * Helper class for bootstrapping the Microbus.
  */
 export class Microbus {
-  private receiver: PacketReceiver;
-  private sender: PacketSender;
+  private packetHandler: PacketHandler;
   private transporter: Transporter;
 
   /**
@@ -29,13 +27,7 @@ export class Microbus {
   constructor(options: Options) {
     this.transporter = options.transporter;
 
-    this.receiver = new PacketReceiver({
-      transporter: options.transporter,
-      serializer: options.serializer,
-      cryptography: options.cryptography,
-    });
-
-    this.sender = new PacketSender({
+    this.packetHandler = new PacketHandler({
       transporter: options.transporter,
       serializer: options.serializer,
       cryptography: options.cryptography,
@@ -49,17 +41,17 @@ export class Microbus {
    * @param {string} receiver - The receiver of the packet
    */
   sendPacket(packet: Packet, receiver?: string) {
-    this.sender.send(packet, receiver);
+    this.packetHandler.send(packet, receiver);
   }
 
   /**
    * Add a handler to handle a specific type of incoming packet.
    *
    * @param {string} type - The type of packet to handle
-   * @param {PacketHandler} handler - The handler that will handle the packet
+   * @param {Handler} handler - The handler that will handle the packet
    */
-  addHandler(type: string | Symbol, handler: PacketHandler) {
-    this.receiver.addHandler(type, handler);
+  addHandler(type: string | Symbol, handler: Handler) {
+    this.packetHandler.addHandler(type, handler);
   }
 
   /**
