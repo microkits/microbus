@@ -1,10 +1,10 @@
 
-import {CryptographyStrategy} from './cryptography/CryptographyStrategy';
-import {Handler} from './packets/Handler';
-import {Packet} from './packets/Packet';
-import {PacketHandler} from './packets/PacketHandler';
-import {Serializer} from './serializer/Serializer';
-import {Transporter} from './transporter/Transporter';
+import { CryptographyStrategy } from './cryptography/CryptographyStrategy';
+import { Handler } from './packets/Handler';
+import { Packet } from './packets/Packet';
+import { PacketHandler } from './packets/PacketHandler';
+import { Serializer } from './serializer/Serializer';
+import { Transporter } from './transporter/Transporter';
 
 interface Options {
   serializer: Serializer;
@@ -50,7 +50,7 @@ export class Microbus {
    * @param {string} type - The type of packet to handle
    * @param {Handler} handler - The handler that will handle the packet
    */
-  addHandler(type: string | Symbol, handler: Handler) {
+  addHandler<P extends Packet>(type: string | Symbol, handler: Handler<P>) {
     this.packetHandler.addHandler(type, handler);
   }
 
