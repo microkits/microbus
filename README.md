@@ -12,8 +12,10 @@ const microbus = new Microbus({
   transporter, serializer, cryptography 
 });
 
+const packet = new MessagePacket("Hi, I'm traveling around the world in a microbus! 🌎🚐")
+
 // If receiver parameter is not passed, the packet is broadcasted.
-microbus.sendPacket(new MessagePacket("Hi, I'm traveling around the world in a microbus! 🌎🚐"));
+microbus.sendPacket(packet);
 ```
 
 ## Receiving a packet 
@@ -27,10 +29,49 @@ const microbus = new Microbus({
 });
 
 // MESSAGE is the packet type
-microbus.addHandler("MESSAGE", (packet: MessagePacket, sender: string) => {
+microbus.addHandler<MessagePacket>("MESSAGE", (request) => {
+  const packet = request.packet;
+  const sender = request.sender;
+  
   console.log(`received message ${packet.message} from ${sender}`);
 });
 ```
+Or
+
+```typescript
+import {Microbus, Request, Response} from "@microkits/microbus";
+
+const microbus = new Microbus({
+  // see below in this page what this means
+  transporter, serializer, cryptography 
+});
+
+// MESSAGE is the packet type
+microbus.addHandler("MESSAGE", (request: Request<MessagePacket>) => {
+  const packet = request.packet;
+  const sender = request.sender;
+  
+  console.log(`received message ${packet.message} from ${sender}`);
+});
+```
+
+## Replying to a Packet
+```typescript
+import {Microbus, Request, Response} from "@microkits/microbus";
+
+const microbus = new Microbus({
+  // see below in this page what this means
+  transporter, serializer, cryptography 
+});
+
+// MESSAGE is the packet type
+microbus.addHandler<MessagePacket>("MESSAGE", (request, response) => {
+
+  // Sends a packet as a reply to the sender
+  response.send(new MessagePacket("We all love this microbus! 🚐🚐"))
+});
+```
+
 
 ## Packets
 A packet is a representation of an object that needs to be sent to another application. It is defined as a Typescript class that will be converted to a Buffer and transmitted over a transporter.
