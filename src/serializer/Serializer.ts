@@ -1,4 +1,4 @@
-import {Packet} from '../packets/Packet';
+import {Packet} from '../core/Packet';
 
 export interface Serializer {
   serialize(packet: Packet): Buffer

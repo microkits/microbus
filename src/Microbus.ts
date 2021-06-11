@@ -1,10 +1,10 @@
 
-import { CryptographyStrategy } from './cryptography/CryptographyStrategy';
-import { Handler } from './packets/Handler';
-import { Packet } from './packets/Packet';
-import { PacketHandler } from './packets/PacketHandler';
-import { Serializer } from './serializer/Serializer';
-import { Transporter } from './transporter/Transporter';
+import {CryptographyStrategy} from './cryptography/CryptographyStrategy';
+import {Handler} from './core/Handler';
+import {Packet} from './core/Packet';
+import {PacketHandler} from './core/PacketHandler';
+import {Serializer} from './serializer/Serializer';
+import {Transporter} from './transporter/Transporter';
 
 interface Options {
   serializer: Serializer;
