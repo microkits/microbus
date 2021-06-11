@@ -101,16 +101,15 @@ abstract stop(): Promise<void>;
 abstract send(buffer: Buffer, receiver?: string): Promise<void>;
 ```
 
-Has the following events:
+It is required to emit a `data` event when a packet is received.
+The `Transporter` has the following events:
 
 ```typescript
 data: (buffer: Buffer, sender: string) => void; //  emitted when a packet is received
 disconnect: () => void; // emitted when the transporter is disconnected
 ```
 
-It is required to emit a `data` event when a packet is received.
-
-### Example of a mqtt based transporter
+Example:
 
 ```typescript
 import * as mqtt from "mqtt";
@@ -187,7 +186,7 @@ serialize(packet: Packet): Buffer
 deserialize(buffer: Buffer): Packet
 ```
 
-### Example
+Example:
 
 ```typescript
 import {Packet, Serializer} from "@microkits/microbus";
@@ -214,7 +213,7 @@ decrypt(data: Buffer): Buffer;
 encrypt(data: Buffer): Buffer;
 ```
 
-### Example: 
+Example: 
 
 ```typescript
 import {CryptographyStrategy} from "@microkits/microbus";
