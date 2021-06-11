@@ -57,7 +57,7 @@ microbus.addHandler("MESSAGE", (request: Request<MessagePacket>) => {
 
 ## Replying to a Packet
 ```typescript
-import {Microbus, Request, Response} from "@microkits/microbus";
+import {Microbus} from "@microkits/microbus";
 
 const microbus = new Microbus({
   // see below in this page what this means
