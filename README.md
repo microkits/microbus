@@ -108,7 +108,7 @@ data: (buffer: Buffer, sender: string) => void; //  emitted when a packet is rec
 disconnect: () => void; // emitted when the transporter is disconnected
 ```
 
-It is required to emit a `data` event when a package is received.
+It is required to emit a `data` event when a packet is received.
 
 ### Example of a mqtt based transporter
 
@@ -180,7 +180,7 @@ export class MqttTransporter extends Transporter {
 
 ## Serializer
 Serializers allow packets to be converted to buffers and from buffers back to packets. 
-It is required to implements the `Serializer` interface, with the following methods: 
+It is necessary to implement the `Serializer` interface, with the following methods:
 
 ```typescript
 serialize(packet: Packet): Buffer
@@ -206,7 +206,7 @@ export class JsonSerializer implements Serializer {
 ```
 
 ## Cryptography 
-There is the possibility of implementing encryption in the buffer carried by the transporter.
+There is the possibility of implementing encryption to data transported in microbus.
 To do this, you must implement the `CryptographyStrategy` interface and implement the following methods: 
 
 ```typescript
