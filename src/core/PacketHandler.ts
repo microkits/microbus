@@ -49,9 +49,7 @@ export class PacketHandler {
       const request = new Request({packet, sender});
 
       for (const handler of handlers) {
-        handler(request, {
-          send: this.send,
-        });
+        handler(request);
       }
     });
   }
