@@ -5,4 +5,3 @@ export {PacketHandler} from './core/PacketHandler';
 export {Serializer} from './serializer/Serializer';
 export {Transporter} from './transporter/Transporter';
 export {Request} from './core/Request';
-export {Response} from './core/Response';
