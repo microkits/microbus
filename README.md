@@ -39,7 +39,7 @@ microbus.addHandler<MessagePacket>("MESSAGE", (request) => {
 Or
 
 ```typescript
-import {Microbus, Request, Response} from "@microkits/microbus";
+import {Microbus, Request} from "@microkits/microbus";
 
 const microbus = new Microbus({
   // see below in this page what this means
@@ -54,24 +54,6 @@ microbus.addHandler("MESSAGE", (request: Request<MessagePacket>) => {
   console.log(`received message ${packet.message} from ${sender}`);
 });
 ```
-
-## Replying to a Packet
-```typescript
-import {Microbus} from "@microkits/microbus";
-
-const microbus = new Microbus({
-  // see below in this page what this means
-  transporter, serializer, cryptography 
-});
-
-// MESSAGE is the packet type
-microbus.addHandler<MessagePacket>("MESSAGE", (request, response) => {
-
-  // Sends a packet as a reply to the sender
-  response.send(new MessagePacket("We all love this microbus! 🚐🚐"))
-});
-```
-
 
 ## Packets
 A packet is a representation of an object that needs to be sent to another application. It is defined as a Typescript class that will be converted to a Buffer and transmitted over a transporter.
