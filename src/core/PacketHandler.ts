@@ -21,7 +21,7 @@ export class PacketHandler {
   private readonly serializer: Serializer;
   private readonly cryptography: CryptographyStrategy;
 
-  static readonly ALL = Symbol('*');
+  static readonly ALL = '*';
 
   /**
    * Creates an instance of PacketReceiver.
@@ -62,7 +62,7 @@ export class PacketHandler {
    * @param {string} type - The type of packet to handle
    * @param {PacketHandler} handler - The handler that will handle the packet
    */
-  addHandler(type: string | Symbol, handler: Handler) {
+  addHandler(type: string, handler: Handler) {
     const handlers = this.handlers.get(type) ?? [];
 
     handlers.push(handler);
