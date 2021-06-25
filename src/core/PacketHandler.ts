@@ -49,11 +49,15 @@ export class PacketHandler {
       const request = new Request({packet, sender, broadcast});
 
       for (const handler of handlers) {
-        const packet = handler(request);
+        const promise = new Promise<void | Packet>((resolve) =>
+          resolve(handler(request)),
+        );
 
-        if (typeof (packet) != "undefined") {
-          this.send(packet, sender);
-        }
+        promise.then((packet) => {
+          if (typeof (packet) != 'undefined') {
+            this.send(packet, sender);
+          }
+        });
       }
     });
   }
