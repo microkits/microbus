@@ -16,7 +16,7 @@ interface Options {
  * encryption and packet forwarding.
  */
 export class PacketHandler {
-  private readonly handlers: Map<string | Symbol, Handler[]>;
+  private readonly handlers: Map<string, Handler[]>;
   private readonly transporter: Transporter;
   private readonly serializer: Serializer;
   private readonly cryptography: CryptographyStrategy;
@@ -49,7 +49,11 @@ export class PacketHandler {
       const request = new Request({packet, sender, broadcast});
 
       for (const handler of handlers) {
-        handler(request);
+        const packet = handler(request);
+
+        if (typeof (packet) != "undefined") {
+          this.send(packet, sender);
+        }
       }
     });
   }

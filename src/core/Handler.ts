@@ -1,5 +1,5 @@
 import {Packet} from './Packet';
 import {Request} from './Request';
 export interface Handler<P = Packet> {
-  (request: Request<P>): void
+  (request: Request<P>): Packet | void
 }
