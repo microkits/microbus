@@ -14,7 +14,7 @@ const microbus = new Microbus({
 
 const packet = new MessagePacket("Hi, I'm traveling around the world in a microbus! 🌎🚐")
 
-// If receiver parameter is not passed, the packet is broadcasted.
+// If the receiver parameter is not passed, the packet will be sent to everyone (broadcast).
 microbus.sendPacket(packet);
 ```
 
@@ -50,7 +50,6 @@ const microbus = new Microbus({
 microbus.addHandler("MESSAGE", (request: Request<MessagePacket>) => {
   const packet = request.packet;
   const sender = request.sender;
-  
   console.log(`received message ${packet.message} from ${sender}`);
 });
 ```
@@ -87,7 +86,7 @@ It is required to emit a `data` event when a packet is received.
 The `Transporter` has the following events:
 
 ```typescript
-data: (buffer: Buffer, sender: string) => void; //  emitted when a packet is received
+data: (buffer: Buffer, sender: string, broadcast: boolean) => void; //  emitted when a packet is received
 disconnect: () => void; // emitted when the transporter is disconnected
 ```
 
@@ -124,6 +123,10 @@ export class MqttTransporter extends Transporter {
     return topic.split(this.delimiter)[0];
   }
 
+  private getReceiver(topic: string) {
+    return topic.split(this.delimiter)[1];
+  }
+
   async start(): Promise<Transporter> {
     return new Promise<Transporter>((resolve, reject) => {
       this.client = mqtt.connect(this.url);
@@ -136,7 +139,9 @@ export class MqttTransporter extends Transporter {
 
       this.client.on("message", (topic, buffer) => {
         const sender = this.getSender(topic);
-        this.emit("data", buffer, sender);
+        const receiver = this.getReceiver(topic);
+        const broadcast = receiver == "ALL";
+        this.emit("data", buffer, sender, broadcast);
       })
 
       this.client.on("error", (error) => {

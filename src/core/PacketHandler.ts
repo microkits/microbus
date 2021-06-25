@@ -35,7 +35,7 @@ export class PacketHandler {
 
     this.handlers = new Map();
 
-    this.transporter.on('data', (buffer, sender) => {
+    this.transporter.on('data', (buffer, sender, broadcast) => {
       if (typeof (this.cryptography) != 'undefined') {
         buffer = this.cryptography.decrypt(buffer);
       }
@@ -46,7 +46,7 @@ export class PacketHandler {
         ...this.handlers.get(PacketHandler.ALL) ?? [],
       ];
 
-      const request = new Request({packet, sender});
+      const request = new Request({packet, sender, broadcast});
 
       for (const handler of handlers) {
         handler(request);

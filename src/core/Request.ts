@@ -3,6 +3,7 @@ import {Packet} from './Packet';
 interface Options<P = Packet> {
   packet: P;
   sender: string;
+  broadcast: boolean;
 }
 
 /**
@@ -12,6 +13,7 @@ interface Options<P = Packet> {
 export class Request<P = Packet> {
   readonly packet: P;
   readonly sender: string;
+  readonly broadcast: boolean;
 
   /**
    * Creates an instance of Request.
@@ -21,5 +23,6 @@ export class Request<P = Packet> {
   constructor(options: Options<P>) {
     this.packet = options.packet;
     this.sender = options.sender;
+    this.broadcast = options.broadcast;
   }
 }
