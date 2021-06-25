@@ -54,6 +54,19 @@ microbus.addHandler("MESSAGE", (request: Request<MessagePacket>) => {
 });
 ```
 
+## Replying to a packet
+To reply to a packet, just return a packet in the handler function. The returned packet will be sent directly to the sender.
+
+```typescript
+microbus.addHandler<MessagePacket>("MESSAGE", (request) => {
+  const packet = request.packet;
+  const sender = request.sender;
+  ...
+  // Will be sent to sender
+  return new MessagePacket("Ok, this is really awesome!");
+});
+```
+
 ## Packets
 A packet is a representation of an object that needs to be sent to another application. It is defined as a Typescript class that will be converted to a Buffer and transmitted over a transporter.
 
