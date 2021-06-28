@@ -36,28 +36,31 @@ export class PacketHandler {
     this.handlers = new Map();
 
     this.transporter.on('data', (buffer, sender, broadcast) => {
-      if (typeof (this.cryptography) != 'undefined') {
-        buffer = this.cryptography.decrypt(buffer);
-      }
 
-      const packet = this.serializer.deserialize(buffer);
-      const handlers = [
-        ...this.handlers.get(packet.type) ?? [],
-        ...this.handlers.get(PacketHandler.ALL) ?? [],
-      ];
+      if (sender != this.transporter.id) {
+        if (typeof (this.cryptography) != 'undefined') {
+          buffer = this.cryptography.decrypt(buffer);
+        }
 
-      const request = new Request({packet, sender, broadcast});
+        const packet = this.serializer.deserialize(buffer);
+        const handlers = [
+          ...this.handlers.get(packet.type) ?? [],
+          ...this.handlers.get(PacketHandler.ALL) ?? [],
+        ];
 
-      for (const handler of handlers) {
-        const promise = new Promise<void | Packet>((resolve) =>
-          resolve(handler(request)),
-        );
+        const request = new Request({packet, sender, broadcast});
 
-        promise.then((packet) => {
-          if (typeof (packet) != 'undefined') {
-            this.send(packet, sender);
-          }
-        });
+        for (const handler of handlers) {
+          const promise = new Promise<void | Packet>((resolve) =>
+            resolve(handler(request)),
+          );
+
+          promise.then((packet) => {
+            if (typeof (packet) != 'undefined') {
+              this.send(packet, sender);
+            }
+          });
+        }
       }
     });
   }
