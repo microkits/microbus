@@ -2,6 +2,15 @@
 
 Designed to make easier to develop communication protocols and data transmission between applications.
 
+## Installation
+```bash
+# With npm
+$ npm install @microkits/microbus
+
+# With yarn
+$ yarn add @microkits/microbus
+```
+
 ## Sending a packet
 
 ```typescript
