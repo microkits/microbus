@@ -1,6 +1,6 @@
-import {CryptographyStrategy} from 'src/cryptography/CryptographyStrategy';
-import {Serializer} from 'src/serializer/Serializer';
-import {Transporter} from 'src/transporter/Transporter';
+import {CryptographyStrategy} from '../cryptography/CryptographyStrategy';
+import {Serializer} from '../serializer/Serializer';
+import {Transporter} from '../transporter/Transporter';
 import {Handler} from './Handler';
 import {Packet} from './Packet';
 import {Request} from './Request';
@@ -36,28 +36,31 @@ export class PacketHandler {
     this.handlers = new Map();
 
     this.transporter.on('data', (buffer, sender, broadcast) => {
-      if (typeof (this.cryptography) != 'undefined') {
-        buffer = this.cryptography.decrypt(buffer);
-      }
 
-      const packet = this.serializer.deserialize(buffer);
-      const handlers = [
-        ...this.handlers.get(packet.type) ?? [],
-        ...this.handlers.get(PacketHandler.ALL) ?? [],
-      ];
+      if (sender != this.transporter.id) {
+        if (typeof (this.cryptography) != 'undefined') {
+          buffer = this.cryptography.decrypt(buffer);
+        }
 
-      const request = new Request({packet, sender, broadcast});
+        const packet = this.serializer.deserialize(buffer);
+        const handlers = [
+          ...this.handlers.get(packet.type) ?? [],
+          ...this.handlers.get(PacketHandler.ALL) ?? [],
+        ];
 
-      for (const handler of handlers) {
-        const promise = new Promise<void | Packet>((resolve) =>
-          resolve(handler(request)),
-        );
+        const request = new Request({packet, sender, broadcast});
 
-        promise.then((packet) => {
-          if (typeof (packet) != 'undefined') {
-            this.send(packet, sender);
-          }
-        });
+        for (const handler of handlers) {
+          const promise = new Promise<void | Packet>((resolve) =>
+            resolve(handler(request)),
+          );
+
+          promise.then((packet) => {
+            if (typeof (packet) != 'undefined') {
+              this.send(packet, sender);
+            }
+          });
+        }
       }
     });
   }
