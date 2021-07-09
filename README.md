@@ -1,6 +1,11 @@
+# Microbus
+
 ![Image of Yaktocat](./docs/assets/logo.png)
 
 Designed to make easier to develop communication protocols and data transmission between applications.
+
+[![CodeQL](https://github.com/microkits/microbus/workflows/CodeQL/badge.svg)](https://github.com/microkits/microbus/actions?query=workflow%3ACodeQL)
+
 
 ## Installation
 ```bash
