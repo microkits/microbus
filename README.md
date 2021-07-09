@@ -4,6 +4,7 @@
 
 Designed to make easier to develop communication protocols and data transmission between applications.
 
+[![npm version](https://badge.fury.io/js/%40microkits%2Fmicrobus.svg)](https://badge.fury.io/js/%40microkits%2Fmicrobus)
 [![CodeQL](https://github.com/microkits/microbus/workflows/CodeQL/badge.svg)](https://github.com/microkits/microbus/actions?query=workflow%3ACodeQL)
 
 
