@@ -85,15 +85,17 @@ microbus.addHandler<MessagePacket>("MESSAGE", (request) => {
 ## Packets
 A packet is a representation of an object that needs to be sent to another application. It is defined as a Typescript class that will be converted to a Buffer and transmitted over a transporter.
 
+
 ```typescript
+type Message = string;
+
+...
+
 import {Packet} from "@microkits/microbus";
 
-export class MessagePacket extends Packet {
-  readonly message: string;
-
-  constructor(message: string) {
-    super("MESSAGE");
-    this.message = message;
+export class MessagePacket extends Packet<Message> {
+  constructor(message: Message) {
+    super("MESSAGE", message);
   }
 }
 ```
