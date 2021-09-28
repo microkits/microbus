@@ -1,18 +1,22 @@
+interface Options<P> {
+  payload: P;
+  type?: string;
+}
 /**
  * Abstract class representing the packet transported
  * by the microbus
  */
- export abstract class Packet<P = unknown> {
-  readonly type: string;
+export class Packet<P = unknown> {
   readonly payload: P;
+  readonly type?: string;
 
   /**
    * Creates an instance of Packet.
    *
    * @param {string} type - The type of the packet
    */
-  constructor(type: string, payload: P) {
-    this.type = type;
-    this.payload = payload;
+  constructor(options: Options<P>) {
+    this.type = options.type;
+    this.payload = options.payload;
   }
 }

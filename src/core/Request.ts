@@ -1,7 +1,7 @@
 import {Packet} from './Packet';
 
-interface Options<P = Packet> {
-  packet: P;
+interface Options<P> {
+  packet: Packet<P>;
   sender: string;
   broadcast: boolean;
 }
@@ -10,8 +10,8 @@ interface Options<P = Packet> {
  * Class responsible for storing
  * data of requests
  */
-export class Request<P = Packet> {
-  readonly packet: P;
+export class Request<P> {
+  readonly packet: Packet<P>;
   readonly sender: string;
   readonly broadcast: boolean;
 
