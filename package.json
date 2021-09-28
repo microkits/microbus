@@ -1,6 +1,6 @@
 {
   "name": "@microkits/microbus",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Designed to make it easier the development of data transmission between server-side applications",
   "author": "Guilherme Covre Dalleprane",
   "license": "MIT",
