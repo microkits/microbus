@@ -1,5 +1,5 @@
-import {EventEmitter} from 'events';
-
+import { EventEmitter } from "events";
+import crypto from "crypto";
 interface TransporterEvents {
   data: (buffer: Buffer, sender: string, broadcast: boolean) => void;
   disconnect: () => void;
@@ -19,7 +19,7 @@ export interface Transporter {
  * responsible for transport the packets
  */
 export abstract class Transporter extends EventEmitter {
-  abstract id: string;
+  readonly id: string;
   abstract start(): Promise<Transporter>;
   abstract stop(): Promise<void>;
   abstract send(buffer: Buffer, receiver?: string): Promise<void>;
@@ -31,5 +31,6 @@ export abstract class Transporter extends EventEmitter {
    */
   constructor() {
     super();
+    this.id = crypto.randomUUID();
   }
 }

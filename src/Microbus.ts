@@ -1,57 +1,161 @@
+import { Packet } from "./core/Packet";
+import { PacketReceiver } from "./core/PacketReceiver";
+import { PacketSender } from "./core/PacketSender";
+import { Payload } from "./core/Payload";
+import { BroadcastOptions, Handler, MicrobusOptions, SendOptions } from "./Microbus.types";
+import { CallbackQueueItem } from "./queue/CallbackQueueItem";
+import { PromiseQueueItem } from "./queue/PromiseQueueItem";
+import { Transporter } from "./transporter/Transporter";
+import crypto from "crypto";
 
-import {Handler} from './core/Handler';
-import {Packet} from './core/Packet';
-import {PacketHandler} from './core/PacketHandler';
-import {CryptographyStrategy} from './cryptography/CryptographyStrategy';
-import {Serializer} from './serializer/Serializer';
-import {Transporter} from './transporter/Transporter';
-
-interface Options {
-  serializer: Serializer;
-  transporter: Transporter;
-  cryptography?: CryptographyStrategy;
-}
-
-/**
- * Helper class for bootstrapping the Microbus.
- */
 export class Microbus {
-  private packetHandler: PacketHandler;
-  private transporter: Transporter;
+  private readonly handlers: Map<string, Handler[]>;
+  private readonly queue: Map<string, CallbackQueueItem | PromiseQueueItem>;
+  private readonly receiver: PacketReceiver;
+  private readonly sender: PacketSender;
+  private readonly transporter: Transporter;
 
-  /**
-   * Creates an instance of Microbus.
-   *
-   * @param {Options} options
-   */
-  constructor(options: Options) {
+  static readonly ALL = '*';
+
+  constructor(options: MicrobusOptions) {
     this.transporter = options.transporter;
+    this.handlers = new Map();
 
-    this.packetHandler = new PacketHandler({
+    this.receiver = new PacketReceiver({
       transporter: options.transporter,
       serializer: options.serializer,
-      cryptography: options.cryptography,
+      cryptography: options.cryptography
     });
-  }
 
-  /**
-   * Send a packet via transporter.
-   *
-   * @param {Packet} packet - The packet to be sent
-   * @param {string} receiver - The receiver of the packet
-   */
-  sendPacket(packet: Packet, receiver?: string) {
-    this.packetHandler.send(packet, receiver);
+    this.sender = new PacketSender({
+      transporter: options.transporter,
+      serializer: options.serializer,
+      cryptography: options.cryptography
+    });
+
+    this.receiver.on("data", (packet, sender, broadcast) => {
+      const id = packet.id;
+      const payload = packet.payload;
+
+      const handlers = [
+        ...this.handlers.get(payload.type) ?? [],
+        ...this.handlers.get(Microbus.ALL) ?? [],
+      ];
+
+      const item = this.queue.get(id);
+
+      if (item != null) {
+
+        if (item instanceof CallbackQueueItem) {
+          item.callback(sender, payload);
+        }
+
+        if (item instanceof PromiseQueueItem) {
+          item.resolve(payload);
+          this.queue.delete(id);
+        }
+      }
+
+      handlers.forEach(handler => {
+        const promise = new Promise<void | Payload>((resolve) =>
+          resolve(handler({
+            payload, sender, broadcast
+          }))
+        );
+
+        promise.then((payload) => {
+          if (typeof (payload) != 'undefined') {
+            const packet = new Packet({ id, payload });
+            this.sender.send(packet, sender);
+          }
+        });
+      });
+    });
+
+    setInterval(() => {
+      this.queue.forEach((item, id) => {
+        if (item.isTimedOut()) {
+
+          if (item instanceof PromiseQueueItem) {
+            item.reject(new Error(`Timedout: ${id}`));
+          }
+
+          this.queue.delete(id);
+        }
+      })
+    }, 1000);
   }
 
   /**
    * Add a handler to handle a specific type of incoming packet.
    *
    * @param {string} type - The type of packet to handle
-   * @param {Handler} handler - The handler that will handle the packet
+   * @param {PacketHandler} handler - The handler that will handle the packet
    */
-  addHandler<P>(type: string, handler: Handler<P>) {
-    this.packetHandler.addHandler(type, handler);
+  addHandler<T>(type: string, handler: Handler<T>) {
+    const handlers = this.handlers.get(type) ?? [];
+
+    handlers.push(handler);
+    this.handlers.set(type, handlers);
+  }
+
+  /**
+   * It sends a packet to a receiver
+   * @param [options] - SendOptions<T>
+   * @returns A promise.
+   */
+  send<T>(options?: SendOptions<T>) {
+    const id = crypto.randomUUID();
+
+    const {
+      payload,
+      timeout,
+      receiver
+    } = options;
+
+    if (timeout > 0) {
+      return new Promise((resolve, reject) => {
+        const item = new PromiseQueueItem({
+          timeout, resolve, reject,
+        });
+
+        this.queue.set(id, item);
+      });
+    }
+
+    const packet = new Packet({
+      id, payload
+    });
+
+    this.sender.send(packet, receiver);
+  }
+
+  /**
+   * It broadcasts a packet
+   * @param options - BroadcastOptions<T>
+   */
+  broadcast<T>(options: BroadcastOptions<T>) {
+    const id = crypto.randomUUID();
+
+    const {
+      payload,
+      timeout,
+      callback
+    } = options;
+
+    if (callback != null) {
+      const item = new CallbackQueueItem({
+        timeout, callback
+      });
+
+      this.queue.set(id, item);
+    }
+
+    const packet = new Packet({
+      id, payload
+    });
+
+    this.sender.send(packet);
   }
 
   /**

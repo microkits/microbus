@@ -17,23 +17,25 @@ $ npm install @microkits/microbus
 $ yarn add @microkits/microbus
 ```
 
-## Sending a packet
+## Payloads
+
+A payload is a representation of an object that needs to be sent to another application. It is defined as a Typescript class that will be converted to a Buffer and transmitted over a transporter.
 
 ```typescript
-import {Microbus} from "@microkits/microbus";
 
-const microbus = new Microbus({
-  // see below in this page what this means
-  transporter, serializer, cryptography 
-});
+import {Payload} from "@microkits/microbus";
 
-const packet = new MessagePacket("Hi, I'm traveling around the world in a microbus! 🌎🚐")
-
-// If the receiver parameter is not passed, the packet will be sent to everyone (broadcast).
-microbus.sendPacket(packet);
+export class MessagePayload extends Payload<string> {
+  constructor(message: string) {
+    super({
+      type: "MESSAGE", 
+      body: message
+    });
+  }
+}
 ```
 
-## Receiving a packet 
+## Sending a payload
 
 ```typescript
 import {Microbus} from "@microkits/microbus";
@@ -43,16 +45,37 @@ const microbus = new Microbus({
   transporter, serializer, cryptography 
 });
 
-// MESSAGE is the packet type
-microbus.addHandler<MessagePacket>("MESSAGE", (request) => {
-  const packet = request.packet;
+const payload = new Payload({
+  type: "MESSAGE",
+  body: "Hi, I'm traveling around the world in a microbus! 🌎🚐"
+})
+
+microbus.send({ payload }, "receiver_id");
+
+// Also is possible to broadcast a payload:
+
+microbus.broadcast({ payload });
+```
+
+## Receiving a payload 
+
+```typescript
+import {Microbus} from "@microkits/microbus";
+
+const microbus = new Microbus({
+  // see below in this page what this means
+  transporter, serializer, cryptography 
+});
+
+// MESSAGE is the payload type
+microbus.addHandler<string>("MESSAGE", (request) => {
+  const payload = request.payload;
   const sender = request.sender;
   
-  console.log(`received message ${packet.message} from ${sender}`);
+  console.log(`received message ${payload.body} from ${sender}`);
 });
 ```
 Or
-
 ```typescript
 import {Microbus, Request} from "@microkits/microbus";
 
@@ -61,44 +84,34 @@ const microbus = new Microbus({
   transporter, serializer, cryptography 
 });
 
-// MESSAGE is the packet type
-microbus.addHandler("MESSAGE", (request: Request<MessagePacket>) => {
-  const packet = request.packet;
+// MESSAGE is the payload type
+microbus.addHandler("MESSAGE", (request: Request<string>) => {
+  const payload = request.payload;
   const sender = request.sender;
-  console.log(`received message ${packet.message} from ${sender}`);
+
+  console.log(`received message ${payload.body} from ${sender}`);
 });
 ```
 
-## Replying to a packet
-To reply to a packet, just return a packet in the handler function. The returned packet will be sent directly to the sender.
+## Replying to a payload
+
+To reply to a payload, just return a payload in the handler function. The returned payload will be sent directly to the sender.
 
 ```typescript
-microbus.addHandler<MessagePacket>("MESSAGE", (request) => {
+microbus.addHandler<string>("MESSAGE", (request) => {
   const packet = request.packet;
   const sender = request.sender;
   ...
   // Will be sent to sender
-  return new MessagePacket("Ok, this is really awesome!");
+  return new Payload({
+    type: "MESSAGE",
+    body: "Ok, this is really awesome!"
+  });
 });
 ```
 
 ## Packets
-A packet is a representation of an object that needs to be sent to another application. It is defined as a Typescript class that will be converted to a Buffer and transmitted over a transporter.
-
-
-```typescript
-type Message = string;
-
-...
-
-import {Packet} from "@microkits/microbus";
-
-export class MessagePacket extends Packet<Message> {
-  constructor(message: Message) {
-    super("MESSAGE", message);
-  }
-}
-```
+Packets are internal objects that represent the information that will be sent by transporters. They contain an id and the payload to be transported and need to be serialized before being sent.
 
 ## Transporter
 A transporter is responsible for defining the communication between different applications, sending and receiving buffers. 
