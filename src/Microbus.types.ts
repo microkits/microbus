@@ -23,5 +23,5 @@ export interface SendOptions<T> {
 export interface BroadcastOptions<T> {
   payload: Payload<T>;
   timeout?: number;
-  callback?: <T>(sender: string, payload: Payload<T>) => void
+  callback?(sender: string, payload: Payload): void;
 }
