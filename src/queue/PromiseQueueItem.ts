@@ -1,9 +1,10 @@
-import { PromiseQueueItemOptions } from "./PromiseQueueItem.types";
-import { AbstractQueueItem } from "./AbstractQueueItem";
+import { PromiseQueueItemOptions } from './PromiseQueueItem.types';
+import { AbstractQueueItem } from './AbstractQueueItem';
+import { Response } from '../core/Response';
 
 export class PromiseQueueItem extends AbstractQueueItem {
-  readonly resolve: <T>(data: T) => void;
-  readonly reject: <T>(data: T) => void;
+  readonly resolve: <T>(response: Response<T>) => void;
+  readonly reject: (error: Error) => void;
 
   constructor(options: PromiseQueueItemOptions) {
     super(options.timeout);

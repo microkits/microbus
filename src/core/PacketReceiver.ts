@@ -4,10 +4,15 @@ import { Serializer } from "../serializer/Serializer";
 import { Transporter } from "../transporter/Transporter";
 import { Packet } from "./Packet";
 import { PacketReceiverOptions } from "./PacketReceiver.types";
-import { Payload } from "./Payload";
 
+interface DataEventOptions {
+  packet: Packet;
+  sender: string;
+  receiver: string;
+  broadcast: boolean;
+}
 interface Events {
-  data: (packet: Packet, sender: string, broadcast: boolean) => void;
+  data: (options: DataEventOptions) => void;
 }
 
 export interface PacketReceiver {
@@ -33,13 +38,17 @@ export class PacketReceiver extends EventEmitter {
     this.cryptography = options.cryptography;
 
     this.transporter.on('data', (buffer, sender, broadcast) => {
+      const receiver = this.transporter.id;
+
       if (typeof (this.cryptography) != 'undefined') {
         buffer = this.cryptography.decrypt(buffer);
       }
 
       const packet = this.serializer.deserialize(buffer);
 
-      this.emit("data", packet, sender, broadcast);
+      this.emit('data', {
+        packet, sender, receiver, broadcast
+      });
     });
   }
 }

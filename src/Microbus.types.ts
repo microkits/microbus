@@ -1,5 +1,6 @@
 import { Payload } from "./core/Payload";
 import { Request } from "./core/Request";
+import { Response } from "./core/Response";
 import { CryptographyStrategy } from "./cryptography/CryptographyStrategy";
 import { Serializer } from "./serializer/Serializer";
 import { Transporter } from "./transporter/Transporter";
@@ -23,5 +24,5 @@ export interface SendOptions<T> {
 export interface BroadcastOptions<T> {
   payload: Payload<T>;
   timeout?: number;
-  callback?(sender: string, payload: Payload): void;
+  callback?(response: Response): void;
 }

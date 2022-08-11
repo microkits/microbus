@@ -1,6 +1,6 @@
-import { Payload } from "../core/Payload";
+import { Response } from '../core/Response';
 
 export interface CallbackQueueItemOptions {
   timeout: number;
-  callback<T>(sender: string, payload: Payload<T>): void;
+  callback<T>(response: Response<T>): void;
 }

@@ -1,8 +1,7 @@
 import { Payload } from './Payload';
 
-export interface Request<T> {
+export interface Response<T = unknown> {
   readonly payload: Payload<T>;
   readonly sender: string;
   readonly receiver: string;
-  readonly broadcast: boolean;
 }

@@ -1,9 +1,9 @@
 import { CallbackQueueItemOptions } from "./CallbackQueueItem.types";
 import { AbstractQueueItem } from "./AbstractQueueItem";
-import { Payload } from "../core/Payload";
+import { Response } from "../core/Response";
 
 export class CallbackQueueItem extends AbstractQueueItem {
-  readonly callback: <T>(sender: string, payload: Payload<T>) => void;
+  readonly callback: <T>(response: Response<T>) => void;
 
   constructor(options: CallbackQueueItemOptions) {
     super(options.timeout);

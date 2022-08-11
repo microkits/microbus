@@ -33,9 +33,12 @@ export class Microbus {
       cryptography: options.cryptography
     });
 
-    this.receiver.on("data", (packet, sender, broadcast) => {
-      const id = packet.id;
-      const payload = packet.payload;
+    this.receiver.on('data', (options) => {
+      const id = options.packet.id;
+      const payload = options.packet.payload;
+      const sender = options.sender;
+      const receiver = options.receiver;
+      const broadcast = options.broadcast;
 
       const handlers = [
         ...this.handlers.get(payload.type) ?? [],
@@ -45,21 +48,24 @@ export class Microbus {
       const item = this.queue.get(id);
 
       if (item != null) {
-
         if (item instanceof CallbackQueueItem) {
-          item.callback(sender, payload);
+          item.callback({
+            payload, sender, receiver
+          });
         }
 
         if (item instanceof PromiseQueueItem) {
-          item.resolve(payload);
+          item.resolve({
+            payload, sender, receiver
+          });
           this.queue.delete(id);
         }
       }
 
-      handlers.forEach(handler => {
+      handlers.forEach((handler) => {
         const promise = new Promise<void | Payload>((resolve) =>
           resolve(handler({
-            payload, sender, broadcast
+            payload, sender, receiver, broadcast
           }))
         );
 
@@ -75,14 +81,13 @@ export class Microbus {
     setInterval(() => {
       this.queue.forEach((item, id) => {
         if (item.isTimedOut()) {
-
           if (item instanceof PromiseQueueItem) {
             item.reject(new Error(`Timedout: ${id}`));
           }
 
           this.queue.delete(id);
         }
-      })
+      });
     }, 1000);
   }
 

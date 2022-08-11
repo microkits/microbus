@@ -1,5 +1,7 @@
+import { Response } from "../core/Response";
+
 export interface PromiseQueueItemOptions {
   timeout: number;
-  resolve: <T>(data: T) => void;
-  reject: <T>(data: T) => void;
+  resolve: <T>(response: Response<T>) => void;
+  reject: (error: Error) => void;
 }
