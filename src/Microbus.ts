@@ -20,6 +20,7 @@ export class Microbus {
   constructor(options: MicrobusOptions) {
     this.transporter = options.transporter;
     this.handlers = new Map();
+    this.queue = new Map();
 
     this.receiver = new PacketReceiver({
       transporter: options.transporter,
