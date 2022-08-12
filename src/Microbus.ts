@@ -119,6 +119,12 @@ export class Microbus {
       receiver
     } = options;
 
+    const packet = new Packet({
+      id, payload
+    });
+
+    this.sender.send(packet, receiver);
+    
     if (timeout > 0) {
       return new Promise((resolve, reject) => {
         const item = new PromiseQueueItem({
@@ -128,12 +134,6 @@ export class Microbus {
         this.queue.set(id, item);
       });
     }
-
-    const packet = new Packet({
-      id, payload
-    });
-
-    this.sender.send(packet, receiver);
   }
 
   /**
