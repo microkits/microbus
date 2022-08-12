@@ -6,7 +6,7 @@ import { Serializer } from "./serializer/Serializer";
 import { Transporter } from "./transporter/Transporter";
 
 export interface Handler<T = unknown> {
-  (request: Request<T>): Promise<Payload> | Promise<void> | Payload | void
+  (request: Request<T>): Promise<Payload | void> | Payload | void;
 }
 
 export interface MicrobusOptions {
