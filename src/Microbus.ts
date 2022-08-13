@@ -7,6 +7,7 @@ import { CallbackQueueItem } from "./queue/CallbackQueueItem";
 import { PromiseQueueItem } from "./queue/PromiseQueueItem";
 import { Transporter } from "./transporter/Transporter";
 import crypto from "crypto";
+import { Response } from "./core/Response";
 
 export class Microbus {
   private readonly handlers: Map<string, Handler[]>;
@@ -110,7 +111,7 @@ export class Microbus {
    * @param [options] - SendOptions<T>
    * @returns A promise.
    */
-  send<T>(options?: SendOptions<T>) {
+  async send<T>(options?: SendOptions<T>): Promise<Response | void> {
     const id = crypto.randomUUID();
 
     const {
@@ -124,7 +125,7 @@ export class Microbus {
     });
 
     this.sender.send(packet, receiver);
-    
+
     if (timeout > 0) {
       return new Promise((resolve, reject) => {
         const item = new PromiseQueueItem({
