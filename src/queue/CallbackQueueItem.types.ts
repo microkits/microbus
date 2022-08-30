@@ -1,6 +1,6 @@
 import { Response } from '../core/Response';
 
-export interface CallbackQueueItemOptions {
+export interface CallbackQueueItemOptions<T> {
   timeout: number;
-  callback<T>(response: Response<T>): void;
+  callback(response: Response<T>): void;
 }

@@ -5,8 +5,8 @@ import { CryptographyStrategy } from "./cryptography/CryptographyStrategy";
 import { Serializer } from "./serializer/Serializer";
 import { Transporter } from "./transporter/Transporter";
 
-export interface Handler<T = unknown> {
-  (request: Request<T>): Promise<Payload | void> | Payload | void;
+export interface Handler<Req = unknown, Res = unknown> {
+  (request: Request<Req>): Promise<Payload<Res> | void> | Payload<Res> | void;
 }
 
 export interface MicrobusOptions {
@@ -21,8 +21,8 @@ export interface SendOptions<T> {
   timeout?: number;
 }
 
-export interface BroadcastOptions<T> {
-  payload: Payload<T>;
+export interface BroadcastOptions<Req, Res> {
+  payload: Payload<Req>;
   timeout?: number;
-  callback?(response: Response): void;
+  callback?(response: Response<Res>): void;
 }
