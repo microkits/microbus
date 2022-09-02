@@ -6,10 +6,10 @@ import { BroadcastOptions, Handler, MicrobusOptions, SendOptions } from "./Micro
 import { CallbackQueueItem } from "./queue/CallbackQueueItem";
 import { PromiseQueueItem } from "./queue/PromiseQueueItem";
 import { Transporter } from "./transporter/Transporter";
-import crypto from "crypto";
 import { Response } from "./core/Response";
-
+import crypto from "crypto";
 export class Microbus {
+  private readonly id: string;
   private readonly handlers: Map<string, Handler[]>;
   private readonly queue: Map<string, CallbackQueueItem | PromiseQueueItem>;
   private readonly receiver: PacketReceiver;
@@ -19,6 +19,7 @@ export class Microbus {
   static readonly ALL = '*';
 
   constructor(options: MicrobusOptions) {
+    this.id = options.id ?? crypto.randomUUID();
     this.transporter = options.transporter;
     this.handlers = new Map();
     this.queue = new Map();
@@ -169,7 +170,7 @@ export class Microbus {
    * Starts up the Microbus
    */
   async start(): Promise<Microbus> {
-    await this.transporter.start();
+    await this.transporter.start(this.id);
     return this;
   }
 

@@ -37,9 +37,7 @@ export class PacketReceiver extends EventEmitter {
     this.serializer = options.serializer;
     this.cryptography = options.cryptography;
 
-    this.transporter.on('data', (buffer, sender, broadcast) => {
-      const receiver = this.transporter.id;
-
+    this.transporter.on('data', (buffer, sender, receiver, broadcast) => {
       if (typeof (this.cryptography) != 'undefined') {
         buffer = this.cryptography.decrypt(buffer);
       }

@@ -10,6 +10,7 @@ export interface Handler<Req = unknown, Res = unknown> {
 }
 
 export interface MicrobusOptions {
+  id?: string;
   serializer: Serializer;
   transporter: Transporter;
   cryptography?: CryptographyStrategy;
