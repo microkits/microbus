@@ -1,7 +1,6 @@
 import { Packet } from "./core/Packet";
 import { PacketReceiver } from "./core/PacketReceiver";
 import { PacketSender } from "./core/PacketSender";
-import { Payload } from "./core/Payload";
 import { BroadcastOptions, Handler, MicrobusOptions, SendOptions } from "./Microbus.types";
 import { CallbackQueueItem } from "./queue/CallbackQueueItem";
 import { PromiseQueueItem } from "./queue/PromiseQueueItem";
@@ -66,11 +65,9 @@ export class Microbus {
       }
 
       handlers.forEach((handler) => {
-        const promise = new Promise<void | Payload>((resolve) =>
-          resolve(handler({
-            payload, sender, receiver, broadcast
-          }))
-        );
+        const promise = Promise.resolve(handler({
+          payload, sender, receiver, broadcast
+        }));
 
         promise.then((payload) => {
           if (typeof (payload) != 'undefined') {
