@@ -1,20 +1,15 @@
 module.exports = {
-  'env': {
-    'es6': true,
-    'node': true
-  },
-  'extends': [
-    'google',
-  ],
-  'parser': '@typescript-eslint/parser',
-  'parserOptions': {
-    'ecmaVersion': 12,
-    'sourceType': 'module',
-  },
-  'plugins': [
+  root: true,
+  ignorePatterns: ["**/*.spec.ts"],
+  parser: '@typescript-eslint/parser',
+  plugins: [
     '@typescript-eslint',
   ],
-  'rules': {
-    'max-len': 'off',
-  },
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+  ],
+  rules: {
+    "@typescript-eslint/explicit-module-boundary-types": "off"
+  }
 };
