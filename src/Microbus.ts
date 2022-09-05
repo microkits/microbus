@@ -7,8 +7,8 @@ import { PromiseQueueItem } from "./queue/PromiseQueueItem";
 import { Transporter } from "./transporter/Transporter";
 import { Response } from "./core/Response";
 import crypto from "crypto";
+
 export class Microbus {
-  private readonly id: string;
   private readonly handlers: Map<string, Handler[]>;
   private readonly queue: Map<string, CallbackQueueItem | PromiseQueueItem>;
   private readonly receiver: PacketReceiver;
@@ -18,7 +18,6 @@ export class Microbus {
   static readonly ALL = '*';
 
   constructor(options: MicrobusOptions) {
-    this.id = options.id ?? crypto.randomUUID();
     this.transporter = options.transporter;
     this.handlers = new Map();
     this.queue = new Map();
@@ -164,10 +163,22 @@ export class Microbus {
   }
 
   /**
+   * It delete all handlers
+   */
+  clear(): Microbus {
+    this.handlers.clear();
+    return this;
+  }
+
+  /**
    * Starts up the Microbus
    */
-  async start(): Promise<Microbus> {
-    await this.transporter.start(this.id);
+  async start(id?: string): Promise<Microbus> {
+    if (id == null) {
+      id = crypto.randomUUID();
+    }
+
+    await this.transporter.start(id);
     return this;
   }
 
