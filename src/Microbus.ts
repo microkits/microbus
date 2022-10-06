@@ -96,11 +96,13 @@ export class Microbus {
    * @param {string} type - The type of packet to handle
    * @param {PacketHandler} handler - The handler that will handle the packet
    */
-  addHandler<Req, Res>(type: string, handler: Handler<Req, Res>) {
+  addHandler<Req, Res>(type: string, handler: Handler<Req, Res>): Microbus {
     const handlers = this.handlers.get(type) ?? [];
 
     handlers.push(handler);
     this.handlers.set(type, handlers);
+
+    return this;
   }
 
   /**
