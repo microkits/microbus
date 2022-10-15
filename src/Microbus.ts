@@ -96,7 +96,7 @@ export class Microbus {
    * @param {string} type - The type of packet to handle
    * @param {PacketHandler} handler - The handler that will handle the packet
    */
-  addHandler<Req, Res>(type: string, handler: Handler<Req, Res>): Microbus {
+  addHandler<Req = unknown, Res = unknown>(type: string, handler: Handler<Req, Res>): Microbus {
     const handlers = this.handlers.get(type) ?? [];
 
     handlers.push(handler);
@@ -110,7 +110,7 @@ export class Microbus {
    * @param [options] - SendOptions<T>
    * @returns A promise.
    */
-  async send<Req, Res>(options?: SendOptions<Req>): Promise<Response<Res> | void> {
+  async send<Req = unknown, Res = unknown>(options?: SendOptions<Req>): Promise<Response<Res> | void> {
     const id = crypto.randomUUID();
 
     const {
@@ -140,7 +140,7 @@ export class Microbus {
    * It broadcasts a packet
    * @param options - BroadcastOptions<T>
    */
-  broadcast<Req, Res>(options: BroadcastOptions<Req, Res>) {
+  broadcast<Req = unknown, Res = unknown>(options: BroadcastOptions<Req, Res>) {
     const id = crypto.randomUUID();
 
     const {
