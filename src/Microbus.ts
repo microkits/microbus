@@ -7,6 +7,7 @@ import { PromiseQueueItem } from "./queue/PromiseQueueItem";
 import { Transporter } from "./transporter/Transporter";
 import { Response } from "./core/Response";
 import crypto from "crypto";
+import { Payload } from "./core/Payload";
 
 export class Microbus {
   private readonly handlers: Map<string, Handler[]>;
@@ -69,7 +70,7 @@ export class Microbus {
         }));
 
         promise.then((payload) => {
-          if (typeof (payload) != 'undefined') {
+          if (payload instanceof Payload) {
             const packet = new Packet({ id, payload });
             this.sender.send(packet, sender);
           }
