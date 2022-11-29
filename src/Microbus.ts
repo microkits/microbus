@@ -36,22 +36,25 @@ export class Microbus extends EventEmitter {
 
   constructor(options: MicrobusOptions) {
     super();
-    this.transporter = Configuration.createTransporter(options.transporter);
     this.handlers = new Map();
     this.queue = new Map();
 
-    this.receiver = new PacketReceiver({
-      transporter: this.transporter,
-      serializer: options.serializer,
-      cryptography: options.cryptography
-    });
+    options.transporter = Configuration.createTransporter(options.transporter);
+    options.serializer = Configuration.createSerializer(options.serializer);
 
+    this.transporter = options.transporter;
     this.transporter.on("disconnect", () => {
       this.emit("disconnect");
     });
 
+    this.receiver = new PacketReceiver({
+      transporter: options.transporter,
+      serializer: options.serializer,
+      cryptography: options.cryptography
+    });
+
     this.sender = new PacketSender({
-      transporter: this.transporter,
+      transporter: options.transporter,
       serializer: options.serializer,
       cryptography: options.cryptography
     });

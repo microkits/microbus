@@ -1,6 +1,6 @@
-import {Packet} from '../core/Packet';
+import { Packet } from '../core/Packet';
 
-export interface Serializer {
-  serialize(packet: Packet): Buffer
-  deserialize(buffer: Buffer): Packet
+export abstract class Serializer {
+  abstract serialize(packet: Packet): Buffer
+  abstract deserialize(buffer: Buffer): Packet
 }
