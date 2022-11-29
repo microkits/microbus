@@ -205,7 +205,7 @@ export class Microbus extends EventEmitter {
       id = crypto.randomUUID();
     }
 
-    await this.transporter.start(id);
+    await this.transporter.connect(id);
     return this;
   }
 

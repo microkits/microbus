@@ -24,7 +24,7 @@ export class MqttTransporter extends Transporter {
     return topic.split("/")[1];
   }
 
-  async start(id: string): Promise<Transporter> {
+  async connect(id: string): Promise<Transporter> {
     return new Promise<Transporter>((resolve, reject) => {
       this.id = id;
       this.client = mqtt.connect(this.url);

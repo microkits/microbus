@@ -18,7 +18,7 @@ export interface Transporter {
  * responsible for transport the packets
  */
 export abstract class Transporter extends EventEmitter {
-  abstract start(id: string): Promise<Transporter>;
+  abstract connect(id: string): Promise<Transporter>;
   abstract stop(): Promise<void>;
   abstract send(buffer: Buffer, receiver?: string): Promise<void>;
 
