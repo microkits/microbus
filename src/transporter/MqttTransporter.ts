@@ -55,7 +55,7 @@ export class MqttTransporter extends Transporter {
   }
 
   async stop() {
-    this.emit("disconnect");
+    this.emit("stop");
     this.client.end();
   }
 

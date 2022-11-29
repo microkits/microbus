@@ -2,6 +2,7 @@ import { EventEmitter } from "events";
 interface TransporterEvents {
   data: (buffer: Buffer, sender: string, receiver: string, broadcast: boolean) => void;
   disconnect: () => void;
+  stop: () => void;
 }
 
 export interface Transporter {
