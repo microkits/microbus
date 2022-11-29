@@ -42,6 +42,10 @@ export class MqttTransporter extends Transporter {
         this.emit("data", buffer, sender, this.id, broadcast);
       });
 
+      this.client.on("disconnect", () => {
+        this.emit("disconnect");
+      });
+      
       this.client.on("error", (error) => {
         if (!this.client.connected) {
           reject(error)

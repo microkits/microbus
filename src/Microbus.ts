@@ -9,6 +9,20 @@ import { Response } from "./core/Response";
 import crypto from "crypto";
 import { Payload } from "./core/Payload";
 
+interface MicrobusEvents {
+  disconnect: () => void;
+}
+
+export interface Microbus {
+  on<U extends keyof MicrobusEvents>(
+    event: U, listener: MicrobusEvents[U]
+  ): this;
+
+  private emit<U extends keyof MicrobusEvents>(
+    event: U, ...args: Parameters<MicrobusEvents[U]>
+  ): boolean;
+}
+
 export class Microbus {
   private readonly handlers: Map<string, Handler[]>;
   private readonly queue: Map<string, CallbackQueueItem | PromiseQueueItem>;
@@ -27,6 +41,10 @@ export class Microbus {
       transporter: options.transporter,
       serializer: options.serializer,
       cryptography: options.cryptography
+    });
+
+    this.transporter.on("disconnect", () => {
+      this.emit("disconnect");
     });
 
     this.sender = new PacketSender({
