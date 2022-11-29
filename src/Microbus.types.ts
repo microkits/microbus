@@ -1,9 +1,9 @@
+import { CreateTransporterOptions } from "./Configuration.types";
 import { Payload } from "./core/Payload";
 import { Request } from "./core/Request";
 import { Response } from "./core/Response";
 import { CryptographyStrategy } from "./cryptography/CryptographyStrategy";
 import { Serializer } from "./serializer/Serializer";
-import { Transporter } from "./transporter/Transporter";
 
 export interface Handler<Req = unknown, Res = unknown> {
   (request: Request<Req>): Promise<Payload<Res> | void> | Payload<Res> | void;
@@ -12,7 +12,7 @@ export interface Handler<Req = unknown, Res = unknown> {
 export interface MicrobusOptions {
   id?: string;
   serializer: Serializer;
-  transporter: Transporter;
+  transporter: CreateTransporterOptions;
   cryptography?: CryptographyStrategy;
 }
 

@@ -6,8 +6,10 @@ import { CallbackQueueItem } from "./queue/CallbackQueueItem";
 import { PromiseQueueItem } from "./queue/PromiseQueueItem";
 import { Transporter } from "./transporter/Transporter";
 import { Response } from "./core/Response";
-import crypto from "crypto";
 import { Payload } from "./core/Payload";
+import { Configuration } from "./Configuration";
+import crypto from "crypto";
+import EventEmitter from "events";
 
 interface MicrobusEvents {
   disconnect: () => void;
@@ -18,12 +20,12 @@ export interface Microbus {
     event: U, listener: MicrobusEvents[U]
   ): this;
 
-  private emit<U extends keyof MicrobusEvents>(
+  emit<U extends keyof MicrobusEvents>(
     event: U, ...args: Parameters<MicrobusEvents[U]>
   ): boolean;
 }
 
-export class Microbus {
+export class Microbus extends EventEmitter {
   private readonly handlers: Map<string, Handler[]>;
   private readonly queue: Map<string, CallbackQueueItem | PromiseQueueItem>;
   private readonly receiver: PacketReceiver;
@@ -33,12 +35,13 @@ export class Microbus {
   static readonly ALL = '*';
 
   constructor(options: MicrobusOptions) {
-    this.transporter = options.transporter;
+    super();
+    this.transporter = Configuration.createTransporter(options.transporter);
     this.handlers = new Map();
     this.queue = new Map();
 
     this.receiver = new PacketReceiver({
-      transporter: options.transporter,
+      transporter: this.transporter,
       serializer: options.serializer,
       cryptography: options.cryptography
     });
@@ -48,7 +51,7 @@ export class Microbus {
     });
 
     this.sender = new PacketSender({
-      transporter: options.transporter,
+      transporter: this.transporter,
       serializer: options.serializer,
       cryptography: options.cryptography
     });
