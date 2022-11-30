@@ -2,14 +2,13 @@ import { Packet } from "./core/Packet";
 import { PacketReceiver } from "./core/PacketReceiver";
 import { PacketSender } from "./core/PacketSender";
 import { BroadcastOptions, Handler, MicrobusOptions, SendOptions } from "./Microbus.types";
-import { CallbackQueueItem } from "./queue/CallbackQueueItem";
-import { PromiseQueueItem } from "./queue/PromiseQueueItem";
 import { Transporter } from "./transporter/Transporter";
 import { Response } from "./core/Response";
 import { Payload } from "./core/Payload";
 import { Configuration } from "./Configuration";
 import crypto from "crypto";
 import EventEmitter from "events";
+import { QueueItem } from "./queue/QueueItem";
 
 interface MicrobusEvents {
   disconnect: () => void;
@@ -27,7 +26,7 @@ export interface Microbus {
 
 export class Microbus extends EventEmitter {
   private readonly handlers: Map<string, Handler[]>;
-  private readonly queue: Map<string, CallbackQueueItem | PromiseQueueItem>;
+  private readonly queue: Map<string, QueueItem>;
   private readonly receiver: PacketReceiver;
   private readonly sender: PacketSender;
   private readonly transporter: Transporter;
@@ -74,18 +73,9 @@ export class Microbus extends EventEmitter {
       const item = this.queue.get(id);
 
       if (item != null) {
-        if (item instanceof CallbackQueueItem) {
-          item.callback({
-            payload, sender, receiver
-          });
-        }
-
-        if (item instanceof PromiseQueueItem) {
-          item.resolve({
-            payload, sender, receiver
-          });
-          this.queue.delete(id);
-        }
+        item.callback({
+          payload, sender, receiver
+        });
       }
 
       handlers.forEach((handler) => {
@@ -101,18 +91,6 @@ export class Microbus extends EventEmitter {
         });
       });
     });
-
-    setInterval(() => {
-      this.queue.forEach((item, id) => {
-        if (item.isTimedOut()) {
-          if (item instanceof PromiseQueueItem) {
-            item.reject(new Error(`Timedout: ${id}`));
-          }
-
-          this.queue.delete(id);
-        }
-      });
-    }, 1000);
   }
 
   /**
@@ -151,12 +129,22 @@ export class Microbus extends EventEmitter {
     this.sender.send(packet, receiver);
 
     if (timeout > 0) {
-      return new Promise((resolve, reject) => {
-        const item = new PromiseQueueItem({
-          timeout, resolve, reject,
-        });
-
+      const successPromise = new Promise<Response<Res>>((resolve) => {
+        const item = new QueueItem(resolve);
         this.queue.set(id, item);
+      });
+
+      const timeoutPromise = new Promise<void>((resolve, reject) => {
+        setTimeout(() => {
+          reject(`Timedout: ${id}`)
+        }, timeout)
+      });
+
+      return Promise.race([
+        successPromise,
+        timeoutPromise
+      ]).finally(() => {
+        this.queue.delete(id);
       });
     }
   }
@@ -175,11 +163,13 @@ export class Microbus extends EventEmitter {
     } = options;
 
     if (callback != null) {
-      const item = new CallbackQueueItem({
-        timeout, callback
-      });
+      const item = new QueueItem(callback);
 
       this.queue.set(id, item);
+
+      setTimeout(() => {
+        this.queue.delete(id);
+      }, timeout)
     }
 
     const packet = new Packet({
