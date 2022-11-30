@@ -9,7 +9,6 @@ export interface Handler<Req = unknown, Res = unknown> {
 }
 
 export interface MicrobusOptions {
-  id?: string;
   serializer: CreateSerializerOptions;
   transporter: CreateTransporterOptions;
   cryptography?: CryptographyStrategy;
