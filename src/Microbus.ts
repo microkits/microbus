@@ -6,25 +6,10 @@ import { Transporter } from "./transporter/Transporter";
 import { Response } from "./core/Response";
 import { Payload } from "./core/Payload";
 import { Configuration } from "./Configuration";
-import crypto from "crypto";
-import EventEmitter from "events";
 import { QueueItem } from "./queue/QueueItem";
+import crypto from "crypto";
 
-interface MicrobusEvents {
-  disconnect: () => void;
-}
-
-export interface Microbus {
-  on<U extends keyof MicrobusEvents>(
-    event: U, listener: MicrobusEvents[U]
-  ): this;
-
-  emit<U extends keyof MicrobusEvents>(
-    event: U, ...args: Parameters<MicrobusEvents[U]>
-  ): boolean;
-}
-
-export class Microbus extends EventEmitter {
+export class Microbus {
   private readonly handlers: Map<string, Handler[]>;
   private readonly queue: Map<string, QueueItem>;
   private readonly receiver: PacketReceiver;
@@ -34,7 +19,6 @@ export class Microbus extends EventEmitter {
   static readonly ALL = '*';
 
   constructor(options: MicrobusOptions) {
-    super();
     this.handlers = new Map();
     this.queue = new Map();
 
@@ -42,9 +26,6 @@ export class Microbus extends EventEmitter {
     options.serializer = Configuration.createSerializer(options.serializer);
 
     this.transporter = options.transporter;
-    this.transporter.on("disconnect", () => {
-      this.emit("disconnect");
-    });
 
     this.receiver = new PacketReceiver({
       transporter: options.transporter,
