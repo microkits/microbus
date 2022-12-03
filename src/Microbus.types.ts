@@ -4,7 +4,7 @@ import { Request } from "./core/Request";
 import { Response } from "./core/Response";
 import { CryptographyStrategy } from "./cryptography/CryptographyStrategy";
 
-export interface Handler<Req = unknown, Res = unknown> {
+export interface Listener<Req = unknown, Res = unknown> {
   (request: Request<Req>): Promise<Payload<Res> | void> | Payload<Res> | void;
 }
 

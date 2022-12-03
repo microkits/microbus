@@ -68,11 +68,14 @@ const microbus = new Microbus({
 });
 
 // MESSAGE is the payload type
-microbus.addHandler<string>("MESSAGE", (request) => {
-  const payload = request.payload;
-  const sender = request.sender;
-  
-  console.log(`received message ${payload.body} from ${sender}`);
+microbus.addListener({
+  type: "MESSAGE", 
+  listener: (request) => {
+    const payload = request.payload;
+    const sender = request.sender;
+    
+    console.log(`received message ${payload.body} from ${sender}`);
+  }
 });
 ```
 Or
@@ -85,28 +88,33 @@ const microbus = new Microbus({
 });
 
 // MESSAGE is the payload type
-microbus.addHandler("MESSAGE", (request: Request<string>) => {
-  const payload = request.payload;
-  const sender = request.sender;
-
-  console.log(`received message ${payload.body} from ${sender}`);
+microbus.addListener({
+  type: "MESSAGE", 
+  listener: (request: Request<string>) => {
+    const payload = request.payload;
+    const sender = request.sender;
+    console.log(`received message ${payload.body} from ${sender}`);
+  }
 });
 ```
 
 ## Replying to a payload
 
-To reply to a payload, just return a payload in the handler function. The returned payload will be sent directly to the sender.
+To reply to a payload, just return a payload in the listener function. The returned payload will be sent directly to the sender.
 
 ```typescript
-microbus.addHandler<string>("MESSAGE", (request) => {
-  const packet = request.packet;
-  const sender = request.sender;
-  ...
-  // Will be sent to sender
-  return new Payload({
-    type: "MESSAGE",
-    body: "Ok, this is really awesome!"
-  });
+microbus.addListener({
+  type: "MESSAGE", 
+  listener: (request: Request<string>) => {
+    const packet = request.packet;
+    const sender = request.sender;
+    ...
+    // Will be sent to sender
+    return new Payload({
+      type: "MESSAGE",
+      body: "Ok, this is really awesome!"
+    });
+  }
 });
 ```
 

@@ -28,6 +28,8 @@ export class PacketSender {
       buffer = this.cryptography.encrypt(buffer);
     }
 
-    this.transporter.send(buffer, receiver);
+    const type = packet.payload.type;
+
+    this.transporter.send(type, buffer, receiver);
   }
 }

@@ -1,16 +1,18 @@
+import { BroadcastOptions, MicrobusOptions, SendOptions } from "./Microbus.types";
+import { Configuration } from "./Configuration";
+import { AddListenerOptions } from "./core/Listeners.types";
 import { Packet } from "./core/Packet";
 import { PacketReceiver } from "./core/PacketReceiver";
 import { PacketSender } from "./core/PacketSender";
-import { BroadcastOptions, Handler, MicrobusOptions, SendOptions } from "./Microbus.types";
-import { Transporter } from "./transporter/Transporter";
+import { Listeners } from "./core/Listeners";
 import { Response } from "./core/Response";
 import { Payload } from "./core/Payload";
-import { Configuration } from "./Configuration";
+import { Transporter } from "./transporter/Transporter";
 import { QueueItem } from "./queue/QueueItem";
-import crypto from "crypto";
 
+import crypto from "crypto";
 export class Microbus {
-  private readonly handlers: Map<string, Handler[]>;
+  private readonly listeners: Listeners;
   private readonly queue: Map<string, QueueItem>;
   private readonly receiver: PacketReceiver;
   private readonly sender: PacketSender;
@@ -19,7 +21,7 @@ export class Microbus {
   static readonly ALL = '*';
 
   constructor(options: MicrobusOptions) {
-    this.handlers = new Map();
+    this.listeners = new Listeners;
     this.queue = new Map();
 
     options.transporter = Configuration.createTransporter(options.transporter);
@@ -46,10 +48,7 @@ export class Microbus {
       const receiver = options.receiver;
       const broadcast = options.broadcast;
 
-      const handlers = [
-        ...this.handlers.get(payload.type) ?? [],
-        ...this.handlers.get(Microbus.ALL) ?? [],
-      ];
+      const listeners = this.listeners.get(sender, payload.type);
 
       const item = this.queue.get(id);
 
@@ -59,8 +58,8 @@ export class Microbus {
         });
       }
 
-      handlers.forEach((handler) => {
-        const promise = Promise.resolve(handler({
+      listeners.forEach((listener) => {
+        const promise = Promise.resolve(listener({
           payload, sender, receiver, broadcast
         }));
 
@@ -75,16 +74,43 @@ export class Microbus {
   }
 
   /**
-   * Add a handler to handle a specific type of incoming packet.
-   *
-   * @param {string} type - The type of packet to handle
-   * @param {PacketHandler} handler - The handler that will handle the packet
+   * Adds a listener function
+   * @param {AddListenerOptions} options - {
+   * @returns The Microbus instance.
    */
-  addHandler<Req = unknown, Res = unknown>(type: string, handler: Handler<Req, Res>): Microbus {
-    const handlers = this.handlers.get(type) ?? [];
+  addListener<Req = unknown, Res = unknown>(options: AddListenerOptions<Req, Res>): Microbus {
+    this.listeners.add(options);
+    this.transporter.subscribe({
+      type: options.type,
+      sender: options.sender
+    });
 
-    handlers.push(handler);
-    this.handlers.set(type, handlers);
+    return this;
+  }
+
+  /**
+   * Remove all listeners that match the given filter.
+   * 
+   * The filter is a function that takes two arguments: the sender and the type. The sender is the name
+   * of the sender that sent the message. The type is the type of the message. The filter function should
+   * return true if the listener should be removed
+   * @param filter - (sender: string, type: string) => boolean
+   * @returns The Microbus instance.
+   */
+  removeListeners(filter: (sender: string, type: string) => boolean): Microbus {
+    const unsubscribe = (sender: string, type: string) => {
+      const remove = filter(sender, type);
+
+      if (remove) {
+        this.transporter.unsubscribe({
+          sender, type
+        })
+      }
+
+      return remove
+    }
+
+    this.listeners.delete(unsubscribe);
 
     return this;
   }
@@ -161,10 +187,10 @@ export class Microbus {
   }
 
   /**
-   * It delete all handlers
+   * It delete all listeners
    */
   clear(): Microbus {
-    this.handlers.clear();
+    this.listeners.clear();
     return this;
   }
 

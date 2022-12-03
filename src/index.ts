@@ -1,3 +1,6 @@
+import { Payload } from './core/Payload';
+import { Microbus } from './Microbus';
+
 export { CryptographyStrategy } from './cryptography/CryptographyStrategy';
 export { Microbus } from './Microbus';
 export { Packet } from './core/Packet';

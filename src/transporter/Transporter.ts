@@ -1,4 +1,5 @@
 import { EventEmitter } from "events";
+import { SubscribeOptions, UnsubscribeOptions } from "./Transporter.types";
 interface TransporterEvents {
   data: (buffer: Buffer, sender: string, receiver: string, broadcast: boolean) => void;
   disconnect: () => void;
@@ -21,8 +22,9 @@ export interface Transporter {
 export abstract class Transporter extends EventEmitter {
   abstract connect(id: string): Promise<Transporter>;
   abstract stop(): Promise<void>;
-  abstract send(buffer: Buffer, receiver?: string): Promise<void>;
-
+  abstract send(type: string, buffer: Buffer, receiver?: string): Promise<void>;
+  subscribe?(options: SubscribeOptions): void;
+  unsubscribe?(options: UnsubscribeOptions): void;
   /**
    * Creates an instance of Transporter.
    *
